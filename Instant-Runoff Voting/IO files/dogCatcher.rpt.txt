@@ -1,0 +1,20 @@
+Input file: dogCatcher.ballots.txt
+  3 candidates
+  5 legal ballots
+  0 discarded ballots
+
+
+Round 1 Results:
+    Larry Smith:	2  (40%)
+    Moe Jones:	2  (40%)
+    Curly Sampson:	1  (20%)
+
+   No Winner.
+Eliminated: 
+   Curly Sampson
+
+Round 2 Results:
+    Larry Smith:	3  (60%)
+    Moe Jones:	2  (40%)
+
+Larry Smith declared winner
