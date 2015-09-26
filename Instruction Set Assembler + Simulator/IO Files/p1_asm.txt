@@ -1,0 +1,14 @@
+initr1
+initr2
+initr3
+initr4
+ld1
+ld2
+ld3
+add
+adds
+dec
+br1
+st1
+st2
+halt
