@@ -1,9 +1,15 @@
 # Previous-Projects
 
-College Work Projects
+College Projects
 
 Here I have pushed various projects I have completed in the past. 
 Most, if not all, are from different classes I took while pursuing my Computer Engineering degree at The University of Illinois at Chicago.
+
+Under Hardware, you will find projects ranging from IC-based circuit design to IC design and architecture to microprocessor-based circuit design and coding.
+
+Under Software, you will find projects that are solely programming. This includes work using Java or x86 Assembly.
+
+The descriptions below are a currently incomplete list of the projects available in this repository. This Readme will be updated and certain folders will be organized in the near future.
 
 --Cache Simulator--
 
