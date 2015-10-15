@@ -12,7 +12,7 @@ Under **Software**, you will find projects that are solely programming, in the f
 * JAVA
 * MASM x86 Assembly
 
-The descriptions below are a currently incomplete list of the projects available in this repository. This Readme will be updated for completeness and certain folders will be organized for clarity in the near future.
+The descriptions below are a currently incomplete list of the projects available in this repository. This Readme will be updated for completeness in the near future.
 
 ## Projects
 
