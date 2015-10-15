@@ -1,0 +1,215 @@
+; This program displays my UIN in the following manner:
+;     One number is shown at a time (for 1s, followed by .5s of non-output)
+;     The number is shown as 4-bit binary followed by 6-bit ASCII (leading 0 removed)
+;     The output for a number is stored in a lookup table
+; My UIN is: 673551999
+; Author: Shuaib Shameem
+; NetID:  SShame3
+; ECE 367
+; Date: Feb. 2, 2012
+
+; Define symbolic constants 
+PortT	  EQU	$240		;Define Register Locations
+DDRT	  EQU	$242
+PortM   EQU $250
+DDRM    EQU $252
+INITRG	EQU	$11
+INITRM	EQU	$10
+CLKSEL	EQU	$39
+PLLCTL	EQU	$3A
+CRGFLG	EQU	$37
+SYNR	  EQU	$34
+REFDV	  EQU	$35
+COPCTL	EQU	$3C
+TSCR1	  EQU	$46
+TSCR2	  EQU	$4D
+TIOS	  EQU	$40
+TCNT	  EQU	$44
+TC0	    EQU	$50
+TFLG1	  EQU	$4E
+
+
+;
+; The ORG statment below would normally be followed by variable definitions
+; There are no variables needed for this project.
+; THIS IS THE BEGINNING SETUP CODE
+;
+      	ORG	$3800		; Beginning of RAM for Variables
+;
+        ORG $5000   ; Use unused space in FLASH to store lookup table
+ ZERO:  DC.W $0C00  ; Output for 0
+ ONE:   DC.W $1C02  ; Output for 1
+ TWO:   DC.W $2C01  ; Output for 2
+ THREE: DC.W $3C03  ; Output for 3
+ FOUR:  DC.W $4D00  ; Output for 4
+ FIVE:  DC.W $5D02  ; Output for 5
+ SIX:   DC.W $6D01  ; Output for 6
+ SEVEN: DC.W $7D03  ; Output for 7
+ EIGHT: DC.W $8E00  ; Output for 8
+ NINE:  DC.W $9E02  ; Output for 9
+  
+
+; The main code begins here. Note the START Label
+;
+      	ORG	$4000		; Beginning of Flash EEPROM
+START	  LDS	#$3FCE		; Top of the Stack
+	      SEI			; Turn Off Interrupts
+        MOVB	#$00, INITRG	; I/O and Control Registers Start at $0000
+	      MOVB	#$39, INITRM	; RAM ends at $3FFF
+;
+; We Need To Set Up The PLL So that the E-Clock = 24MHz
+;
+	      BCLR CLKSEL,$80 ; disengage PLL from system
+	      BSET PLLCTL,$40 ; turn on PLL
+	      MOVB #$2,SYNR   ; set PLL multiplier
+	      MOVB #$0,REFDV  ; set  PLL divider
+	      NOP		; No OP
+	      NOP		; NO OP
+PLP 	  BRCLR CRGFLG,$08,PLP ; while (!(crg.crgflg.bit.lock==1))
+	      BSET CLKSEL,$80 ; engage PLL
+;
+;
+;
+	      CLI		; Turn ON Interrupts
+;
+; End of  setup code. You will always need the above setup code for every experiment
+;
+
+
+
+
+	      LDAA #$FF   ; Make PortT Outbound
+	      STAA DDRT
+	      LDAA #$C3   ; Make PortM Inbound on all, expect the lowest and highest two pins
+	      STAA DDRM
+	      LDAA #$00   ; Reset PortT and PortM to 0
+	      STAA PortT  
+	      STAA PortM
+	      NOP
+	      NOP
+
+HERE:   BRSET PortM, $20, HERE ; Branch if PM5 is SET (1) to HERE - i.e repeat this line 
+; i.e check PM5 again. Hence polling! Assumes PORTM = $250 and the DDRM = $252 
+;code to run when PM5 = LOW ; If we get here PM5 is LOW
+
+
+
+; The code below will load the output data for each number into Register D
+; Then it will store the higher byte into PortT and the lower byte into PortM
+; After that, we will delay for approx. 1s, then cause the LEDs to go off for .5s
+; Once that is done, the process is repeated until the UIN is completed
+	      
+	      ;Display 6
+        LDD SIX
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 7
+        LDD SEVEN
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 3
+        LDD THREE
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 5
+        LDD FIVE
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 5
+        LDD FIVE
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 1
+        LDD ONE
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 9
+        LDD NINE
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 9
+        LDD NINE
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+        
+        ;Display 9
+        LDD NINE
+        STAA PortT
+        STAB PortM
+        JSR DELAY
+        JSR DELAY
+        JSR BLINK
+           
+        BRA	*	; Stop the program (Branch here forever)
+;
+; We use some built-in timer functions to create an accurate delay
+;
+DELAY 	PSHA			; Save accumulator A on the stack
+        LDY	#5		; We will repeat this subroutine 5 times
+	      MOVB	#$90,TSCR1	; enable TCNT & fast flags clear
+	      MOVB	#$06,TSCR2 	; configure prescale factor to 64
+	      MOVB	#$01,TIOS	; enable OC0
+	      LDD	TCNT		; Get current TCNT value
+AGAIN	  ADDD	#37500		; start an output compare operation
+	      STD	TC0		; with 100 ms time delay
+WAIT	  BRCLR	TFLG1,$01,WAIT  ; Wait for TCNT to catch up
+	      LDD	TC0		; Get the value in TC0
+	      DBNE	Y,AGAIN		; 5 X 100ms = 0.5 sec
+	      PULA			; Pull A
+	      RTS
+;
+; End of counter code
+
+;
+; Used to turn the LEDs off for a fraction of time before displaying
+;  another set of output for a new number
+;
+BLINK   PSHA
+        LDAA #00
+        STAA PortT
+        STAA PortM
+        JSR DELAY
+        PULA
+        RTS
+
+; Define Power-On Reset Interrupt Vector
+
+; AGAIN - OP CODES are at column 9 
+
+        ORG $FFFE ; $FFFE, $FFFF = Power-On Reset Int. Vector Location
+        FDB START ; Specify instruction to execute on power up
+
+; End of Interrupt code
+     
+        END        ; (Optional) End of source code
